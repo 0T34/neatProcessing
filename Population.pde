@@ -75,7 +75,7 @@ class Population{
       }
     }
     if(removedSpecies.size() > 0)
-      println(species.removeAll(removedSpecies));
+      species.removeAll(removedSpecies);
   }
   
   void naturalSelection(){
@@ -261,12 +261,12 @@ class Population{
   }
   
   void mutate(Genome child){
-    println("mutate call");
+    //println("mutate call");
     float mutateWeightRate = 0.5;
     float addConnectionRate = 0.1;
     float addNodeRate = 0.1;
     
-    if(random(0, 1) <= mutateWeightRate){
+    if(random(0, 1) <= mutateWeightRate && child.connections.size() > 0){
       ConnectionGene connection = child.connections.get(int(random(0, child.connections.size()-1)));
       
       if(random(0, 1) <= 0.9){
@@ -276,7 +276,7 @@ class Population{
       }
     }
     
-    if(random(0,1) <= addConnectionRate){
+    if(random(0,1) <= addConnectionRate || child.connections.size() == 0){
       boolean mutated = false;
       int maximumTries = 5;
       do{
@@ -333,7 +333,7 @@ class Population{
       } while(!mutated && maximumTries > 0);
     }
     
-    if(random(0, 1) <= addNodeRate){
+    if(random(0, 1) <= addNodeRate && child.connections.size() > 0){
       ConnectionGene connection = child.connections.get(int(random(0, child.connections.size()-1)));
       
       NodeGene newNode = new NodeGene(2, child.nodes.size()+1);

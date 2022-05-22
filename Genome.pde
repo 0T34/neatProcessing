@@ -7,6 +7,16 @@ class Genome{
   float fitness = 0;
   
   Genome(){}
+
+  Genome(int inputs, int outputs){
+    for (int i = 1; i < inputs + 1; i++) {
+      this.nodes.add(new NodeGene(1, i));
+    }
+
+    for (int i = inputs + 1; i < inputs + outputs + 1; i++) {
+      this.nodes.add(new NodeGene(3, i));
+    }
+  }
   
   Genome(ArrayList<ConnectionGene> connections, ArrayList<NodeGene> nodes){
     this.connections = connections;
