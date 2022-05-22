@@ -3,8 +3,7 @@ import java.util.Map;
 Population pop;
 
 void setup(){
-  Genome startinggenome = new Genome(3, 1);
-  pop = new Population(100, startinggenome, 3, 4);
+  pop = new Population(100, 3, 1);
 }
 
 void draw(){

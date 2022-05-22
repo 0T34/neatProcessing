@@ -10,25 +10,16 @@ class Population{
   int lastInput;
   int lastOutput;
   
-  Population(int size, Genome firstOne, int lastInput, int lastOutput){
+  Population(int size, int inputs, int outputs){
     gens = new ArrayList();
     this.size = size;
-    this.lastInput = lastInput;
-    this.lastOutput = lastOutput;
+    this.lastInput = inputs;
+    this.lastOutput = inputs + outputs;
     
+    Genome firstOne = new Genome(inputs, outputs);
     createFirstPopulation(firstOne);
   }
-  
-  Population(ArrayList<Genome> gens, int size, int lastInput, int lastOutput){
-    this.gens = gens;
-    this.size = size;
-    this.lastInput = lastInput;
-    this.lastOutput = lastOutput;
-  }
-  
-  Population(){
-  }
-  
+
   void sortSpecies(){
     speciesMap = new HashMap();
     for(Specie s : species){
