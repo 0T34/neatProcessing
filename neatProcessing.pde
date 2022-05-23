@@ -24,5 +24,23 @@ void draw(){
           " | Fitness: " + winnergenome.fitness +
           " | Sum: " + sum);
 
+  if (winnergenome.fitness >= 4000) {
+    int expressedconnections = 0;
+    for (int i = 0; i < winnergenome.connections.size(); i++) {
+      if (winnergenome.connections.get(i).expressed == true) {
+        expressedconnections++;
+      }
+    }
+    
+    println("Done." + 
+            "\n+ Total generations: " + pop.generation +
+            "\n+ Total connections: " + winnergenome.connections.size() +
+            "\n+ Total EXPRESSED conenctions: " + expressedconnections +
+            "\n+ Total nodes: " + winnergenome.nodes.size() + 
+            "\n+ Fitness: " + winnergenome.fitness);
+
+    exit();
+  }
+
   pop.naturalSelection();
 }

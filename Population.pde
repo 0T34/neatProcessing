@@ -6,16 +6,14 @@ class Population{
   ArrayList<Specie> species = new ArrayList();
   Map<Genome, Specie> speciesMap = new HashMap();
   int size;
+  int inputcount;
   int generation = 0;
-  int lastInput;
-  int lastOutput;
   
   Population(int size, int inputs, int outputs){
     gens = new ArrayList();
     this.size = size;
-    this.lastInput = inputs;
-    this.lastOutput = inputs + outputs;
     
+    this.inputcount = inputs;
     Genome firstOne = new Genome(inputs, outputs);
     createFirstPopulation(firstOne);
   }
@@ -253,159 +251,14 @@ class Population{
   
   void mutate(Genome child){
     //println("mutate call");
+    int maxMutationAttempts = 5;
     float mutateWeightRate = 0.5;
     float addConnectionRate = 0.1;
     float addNodeRate = 0.1;
-    
-    if(random(0, 1) <= mutateWeightRate && child.connections.size() > 0){
-      ConnectionGene connection = child.connections.get(int(random(0, child.connections.size()-1)));
-      
-      if(random(0, 1) <= 0.9){
-        connection.weight = connection.weight*random(-2, 2);
-      } else {
-        connection.weight = random(-2, 2);
-      }
-    }
-    
-    if(random(0,1) <= addConnectionRate || child.connections.size() == 0){
-      boolean mutated = false;
-      int maximumTries = 5;
-      do{
-        maximumTries--;
-        NodeGene n1 = new NodeGene();
-        NodeGene n2 = new NodeGene();
-        int node = int(random(1, child.nodes.size()));
-        if(node <= lastInput || node > lastOutput){
-          int node2 = int(random(lastInput+1, child.nodes.size()));
-          if(node != node2){
-            for(NodeGene n : child.nodes){
-              if(n.id == node){
-                n1 = n;
-              }
-              if(n.id == node2){
-                n2 = n;
-              }
-            }
-            boolean alreadyExists = false;
-            boolean possible = true;
-            if(n1.type == 2 && n2.type == 2){
-              if(n1.layer >= n2.layer){
-                possible = false;
-              }
-            }
-            for(ConnectionGene con : child.connections){
-              if(con.inNode == node && con.outNode == node2){
-                alreadyExists = true;
-              }
-            }
-            
-            if(!alreadyExists && possible){
-              //create new connection
-              int inNum = 0;
-              boolean found = false;
-              for(ConnectionGene con : Mutations.getInnovations()){
-                if(con.inNode == node && con.outNode == node2){
-                  inNum = con.innovation;
-                  found = true;
-                  break;
-                }
-              }
-              if(!found){
-                ConnectionGene innCon = new ConnectionGene(node, node2, InnovationGenerator.getInnovation());
-                Mutations.addInnovations(innCon);
-                inNum = innCon.innovation;
-              }
-              
-              child.connections.add(new ConnectionGene(node, node2, random(-2, 2), true, inNum));
-              mutated = true;
-            }
-          }
-        }
-      } while(!mutated && maximumTries > 0);
-    }
-    
-    if(random(0, 1) <= addNodeRate && child.connections.size() > 0){
-      ConnectionGene connection = child.connections.get(int(random(0, child.connections.size()-1)));
-      
-      NodeGene newNode = new NodeGene(2, child.nodes.size()+1);
-      child.nodes.add(newNode);
-      
-      NodeGene originalIn = new NodeGene();
-      NodeGene originalOut = new NodeGene();
-      
-      for(NodeGene ng : child.nodes){
-        if(ng.id == connection.inNode){
-          originalIn = ng;
-        }
-        if(ng.id == connection.outNode){
-          originalOut = ng;
-        }
-      }
-      
-      if(originalIn.type == 1 && originalOut.type == 3){
-        newNode.layer = 1;
-      } else if(originalIn.type == 2 && originalOut.type == 3){
-        newNode.layer = originalIn.layer+1;
-      } else if(originalIn.type == 1 && originalOut.type == 2){
-        //caso originalOut for layer 1
-        if(originalOut.layer == 1){
-          //aumentar 1 numero em todas as hidden layers
-          for(NodeGene ng : child.nodes){
-            if(ng.layer > 0){
-              ng.layer += 1;
-            }
-          }
-        }
-        
-        //setar novo nodo como layer 1
-        newNode.layer = 1;
-      } else if(originalIn.type == 2 && originalOut.type == 2){
-        //caso a layer do originalOut for layer do originalIn + 1
-        if(originalOut.layer == originalIn.layer+1){
-          //aumentar 1 numero na layer do originalOut e de todos os nodos da mesma layer
-          for(NodeGene ng : child.nodes){
-            if(ng.layer >= originalOut.layer){
-              ng.layer += 1;
-            }
-          }
-        }
-        
-        //setar novo nodo como layer originalIn + 1
-        newNode.layer = originalIn.layer+1;
-      }
-      
-      int in1 = 0;
-      int in2 = 0;
-      boolean found1 = false;
-      boolean found2 = false;
-      for(ConnectionGene con : Mutations.getInnovations()){
-        if(con.inNode == connection.inNode && con.outNode == newNode.id){
-          in1 = con.innovation;
-          found1 = true;
-        }
-        if(con.inNode == newNode.id && con.outNode == connection.outNode){
-          in2 = con.innovation;
-          found2 = true;
-        }
-      }
-      if(!found1){
-        ConnectionGene innCon = new ConnectionGene(connection.inNode, newNode.id, InnovationGenerator.getInnovation());
-        Mutations.addInnovations(innCon);
-        in1 = innCon.innovation;
-      }
-      if(!found2){
-        ConnectionGene innCon = new ConnectionGene(newNode.id, connection.outNode, InnovationGenerator.getInnovation());
-        Mutations.addInnovations(innCon);
-        in2 = innCon.innovation;
-      }      
-      
-      ConnectionGene newCon1 = new ConnectionGene(connection.inNode, newNode.id, 1f, true, in1);
-      ConnectionGene newCon2 = new ConnectionGene(newNode.id, connection.outNode, connection.weight, true, in2);
-      
-      child.connections.add(newCon1);
-      child.connections.add(newCon2);
-      connection.expressed = false;
-    }
+  
+    child.addConnectionMutation(this.inputcount, addConnectionRate, maxMutationAttempts);
+    child.weightMutation(mutateWeightRate);
+    child.addNodeMutation(addNodeRate);
   }
   
   void createFirstPopulation(Genome gen){
